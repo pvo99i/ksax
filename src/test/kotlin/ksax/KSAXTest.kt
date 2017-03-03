@@ -1,4 +1,4 @@
-package kxml
+package ksax
 
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.Assert.fail

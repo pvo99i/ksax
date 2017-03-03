@@ -1,4 +1,4 @@
-package kxml
+package ksax
 
 import org.xml.sax.Attributes
 import org.xml.sax.helpers.DefaultHandler
@@ -194,12 +194,12 @@ private class KSAXHandler(ruleBuilder: KSAXRuleBuilderImpl, val exFactory: (Stri
     override fun endElement(uri: String, localName: String, qName: String) {
         Optional.ofNullable(valueRules[currentPath]).ifPresent {
             val s = data.toString().trim()
-            add(it!!.converter(s))
+            add(it.converter(s))
             processedRules.add(it.path)
         }
 
         Optional.ofNullable(postProcessRules[currentPath]).ifPresent {
-            val namedValue = it!!.converter(ctx)
+            val namedValue = it.converter(ctx)
             addToList(namedValue)
             processedRules.add(it.path)
         }
