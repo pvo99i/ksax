@@ -29,13 +29,13 @@ class KSAXTest {
 
 
     @Suppress("UNCHECKED")
-    val parser = xmlRules {
-        store(BOOK_ID)
-        store(BOOK_AUTHOR)
-        store(BOOK_TITLE)
-        store(BOOK_PRICE)
+    val parser = parseRules {
+        push(BOOK_ID)
+        push(BOOK_AUTHOR)
+        push(BOOK_TITLE)
+        push(BOOK_PRICE)
 
-        storeToList(BOOK to BOOKS) { ctx ->
+        pushToList(BOOK to BOOKS) { ctx ->
             Book(
                     id = ctx.popNonNull(BOOK_ID),
                     author = ctx.popNonNull(BOOK_AUTHOR),
@@ -71,10 +71,10 @@ class KSAXTest {
 
     @Test
     fun `test with non-existent rules`() {
-        val parser = xmlRules {
-            store("a/b/c")
-            store("a/b/c@d")
-            storeToList("a/b" to "B") {
+        val parser = parseRules {
+            push("a/b/c")
+            push("a/b/c@d")
+            pushToList("a/b" to "B") {
                 it
             }
 

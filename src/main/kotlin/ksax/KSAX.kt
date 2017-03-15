@@ -11,10 +11,10 @@ class KSAXRule<out T : Any>(val path: String, val converter: (String) -> Pair<St
 class KSAXPostProcessRule<out T : Any>(val path: String, val converter: (HashMap<String, Any>) -> Pair<String, T>)
 
 interface KSAXRuleBuilder {
-    fun <T : Any> store(pathToName: Pair<String, String>, converter: (String) -> T)
-    fun store(pathToName: Pair<String, String>)
-    fun store(tagName: String)
-    fun <T : Any> storeToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T)
+    fun <T : Any> push(pathToName: Pair<String, String>, converter: (String) -> T)
+    fun push(pathToName: Pair<String, String>)
+    fun push(tagName: String)
+    fun <T : Any> pushToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T)
 }
 
 class KSAXRuleBuilderImpl : KSAXRuleBuilder {
@@ -37,7 +37,7 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
     val postProcessRules: Map<String, KSAXPostProcessRule<*>>
         get() = internalPostProcessRules
 
-    override fun <T : Any> store(pathToName: Pair<String, String>, converter: (String) -> T) {
+    override fun <T : Any> push(pathToName: Pair<String, String>, converter: (String) -> T) {
         val f: (String) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
@@ -57,14 +57,14 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
         }
     }
 
-    override fun store(pathToName: Pair<String, String>) {
+    override fun push(pathToName: Pair<String, String>) {
         val f: (String) -> String = { it }
-        store(pathToName, f)
+        push(pathToName, f)
     }
 
-    override fun store(tagName: String) = store(tagName to tagName)
+    override fun push(tagName: String) = push(tagName to tagName)
 
-    override fun <T : Any> storeToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T) {
+    override fun <T : Any> pushToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T) {
         val f: (HashMap<String, Any>) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
@@ -127,7 +127,7 @@ class KSAXParser<out T : Any>(
 
 private val defaultResultBuilder: (Map<String, Any>) -> Map<String, Any> = { it }
 
-fun <R : Any> xmlRules(block: KSAXParser<Map<String, Any>>.() -> KSAXParser<R>): KSAXParser<R> {
+fun <R : Any> parseRules(block: KSAXParser<Map<String, Any>>.() -> KSAXParser<R>): KSAXParser<R> {
     val helper = KSAXParser(KSAXRuleBuilderImpl(), defaultResultBuilder)
     return helper.run(block)
 }
