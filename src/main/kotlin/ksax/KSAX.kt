@@ -11,10 +11,10 @@ class KSAXRule<out T : Any>(val path: String, val converter: (String) -> Pair<St
 class KSAXPostProcessRule<out T : Any>(val path: String, val converter: (HashMap<String, Any>) -> Pair<String, T>)
 
 interface KSAXRuleBuilder {
-    fun <T : Any> push(pathToName: Pair<String, String>, converter: (String) -> T)
-    fun push(pathToName: Pair<String, String>)
-    fun push(tagName: String)
-    fun <T : Any> pushToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T)
+    fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T)
+    fun push(pathToName: Pair<String, String>, optional: Boolean = false)
+    fun push(tagName: String, optional: Boolean = false)
+    fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any>) -> T)
 }
 
 class KSAXRuleBuilderImpl : KSAXRuleBuilder {
@@ -23,10 +23,10 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
     private val internalAttrRules: HashMap<String, HashMap<String, KSAXRule<Any>>> = HashMap()
     private val internalPostProcessRules = HashMap<String, KSAXPostProcessRule<Any>>()
 
-    private val internalAllRules = ArrayList<String>()
+    private val internalAllRequiredRules = ArrayList<String>()
 
     val allRules: List<String>
-        get() = internalAllRules
+        get() = internalAllRequiredRules
 
     val nodeRules: Map<String, KSAXRule<Any>>
         get() = internalNodeRules
@@ -37,14 +37,14 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
     val postProcessRules: Map<String, KSAXPostProcessRule<*>>
         get() = internalPostProcessRules
 
-    override fun <T : Any> push(pathToName: Pair<String, String>, converter: (String) -> T) {
+    override fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean, converter: (String) -> T) {
         val f: (String) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
 
         val rule = KSAXRule(pathToName.first, f)
 
-        internalAllRules.add(pathToName.first)
+        if (!optional) internalAllRequiredRules.add(pathToName.first)
 
         if (rule.path.contains('@')) {
             val node = rule.path.substringBefore('@')
@@ -57,19 +57,19 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
         }
     }
 
-    override fun push(pathToName: Pair<String, String>) {
+    override fun push(pathToName: Pair<String, String>, optional: Boolean) {
         val f: (String) -> String = { it }
-        push(pathToName, f)
+        push(pathToName, optional, f)
     }
 
-    override fun push(tagName: String) = push(tagName to tagName)
+    override fun push(tagName: String, optional: Boolean) = push(tagName to tagName, optional)
 
-    override fun <T : Any> pushToList(pathToName: Pair<String, String>, converter: (HashMap<String, Any>) -> T) {
+    override fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean, converter: (HashMap<String, Any>) -> T) {
         val f: (HashMap<String, Any>) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
         val rule = KSAXPostProcessRule(pathToName.first, f)
-        internalAllRules.add(pathToName.first)
+        if (!optional) internalAllRequiredRules.add(pathToName.first)
         internalPostProcessRules[pathToName.first] = rule
     }
 }
