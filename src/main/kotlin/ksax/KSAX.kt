@@ -11,10 +11,10 @@ class KSAXRule<out T : Any>(val path: String, val converter: (String) -> Pair<St
 class KSAXPostProcessRule<out T : Any>(val path: String, val converter: (HashMap<String, Any>) -> Pair<String, T>)
 
 interface KSAXRuleBuilder {
-    fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T)
+    fun <T> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T)
     fun push(pathToName: Pair<String, String>, optional: Boolean = false)
     fun push(tagName: String, optional: Boolean = false)
-    fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any>) -> T)
+    fun <T> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any>) -> T)
 }
 
 class KSAXRuleBuilderImpl : KSAXRuleBuilder {
