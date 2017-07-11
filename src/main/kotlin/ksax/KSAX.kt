@@ -14,7 +14,7 @@ interface KSAXRuleBuilder {
     fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T?)
     fun push(pathToName: Pair<String, String>, optional: Boolean = false)
     fun push(tagName: String, optional: Boolean = false)
-    fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any?>) -> T)
+    fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any?>) -> T?)
 }
 
 class KSAXRuleBuilderImpl : KSAXRuleBuilder {
@@ -64,8 +64,8 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
 
     override fun push(tagName: String, optional: Boolean) = push(tagName to tagName, optional)
 
-    override fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean, converter: (HashMap<String, Any?>) -> T) {
-        val f: (HashMap<String, Any?>) -> Pair<String, T> = {
+    override fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean, converter: (HashMap<String, Any?>) -> T?) {
+        val f: (HashMap<String, Any?>) -> Pair<String, T?> = {
             pathToName.second to converter(it)
         }
         val rule = KSAXPostProcessRule(pathToName.first, f)
