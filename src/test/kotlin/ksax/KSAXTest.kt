@@ -56,7 +56,7 @@ class KSAXTest {
         ByteArrayInputStream(data).use {
             val parsedObjects = parser.parse(it)
             assertThat(parsedObjects).hasSize(12)
-            assertThat(parsedObjects.filter { it.price == BigDecimal.ZERO }).hasSize(2)
+            assertThat(parsedObjects?.filter { it.price == BigDecimal.ZERO }).hasSize(2)
         }
     }
 
