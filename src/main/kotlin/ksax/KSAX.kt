@@ -6,29 +6,29 @@ import java.io.InputStream
 import java.util.*
 import javax.xml.parsers.SAXParserFactory
 
-class KSAXRule<out T : Any>(val path: String, val converter: (String) -> Pair<String, T?>)
+class KSAXRule<out T>(val path: String, val converter: (String) -> Pair<String, T>)
 
-class KSAXPostProcessRule<out T>(val path: String, val converter: (HashMap<String, Any?>) -> Pair<String, T?>)
+class KSAXPostProcessRule<out T>(val path: String, val converter: (HashMap<String, Any?>) -> Pair<String, T>)
 
 interface KSAXRuleBuilder {
-    fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T?)
+    fun <T> push(pathToName: Pair<String, String>, optional: Boolean = false, converter: (String) -> T)
     fun push(pathToName: Pair<String, String>, optional: Boolean = false)
     fun push(tagName: String, optional: Boolean = false)
-    fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any?>) -> T?)
+    fun <T> pushToList(pathToName: Pair<String, String>, optional: Boolean = false, converter: (HashMap<String, Any?>) -> T)
 }
 
 class KSAXRuleBuilderImpl : KSAXRuleBuilder {
 
-    private val internalNodeRules: HashMap<String, KSAXRule<Any>> = HashMap()
-    private val internalAttrRules: HashMap<String, HashMap<String, KSAXRule<Any>>> = HashMap()
-    private val internalPostProcessRules = HashMap<String, KSAXPostProcessRule<Any>>()
+    private val internalNodeRules: HashMap<String, KSAXRule<Any?>> = HashMap()
+    private val internalAttrRules: HashMap<String, HashMap<String, KSAXRule<Any?>>> = HashMap()
+    private val internalPostProcessRules = HashMap<String, KSAXPostProcessRule<Any?>>()
 
     private val internalAllRequiredRules = ArrayList<String>()
 
     val allRules: List<String>
         get() = internalAllRequiredRules
 
-    val nodeRules: Map<String, KSAXRule<Any>>
+    val nodeRules: Map<String, KSAXRule<Any?>>
         get() = internalNodeRules
 
     val attrRules: Map<String, Map<String, KSAXRule<*>>>
@@ -37,8 +37,8 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
     val postProcessRules: Map<String, KSAXPostProcessRule<*>>
         get() = internalPostProcessRules
 
-    override fun <T : Any> push(pathToName: Pair<String, String>, optional: Boolean, converter: (String) -> T?) {
-        val f: (String) -> Pair<String, T?> = {
+    override fun <T> push(pathToName: Pair<String, String>, optional: Boolean, converter: (String) -> T) {
+        val f: (String) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
 
@@ -64,8 +64,8 @@ class KSAXRuleBuilderImpl : KSAXRuleBuilder {
 
     override fun push(tagName: String, optional: Boolean) = push(tagName to tagName, optional)
 
-    override fun <T : Any> pushToList(pathToName: Pair<String, String>, optional: Boolean, converter: (HashMap<String, Any?>) -> T?) {
-        val f: (HashMap<String, Any?>) -> Pair<String, T?> = {
+    override fun <T> pushToList(pathToName: Pair<String, String>, optional: Boolean, converter: (HashMap<String, Any?>) -> T) {
+        val f: (HashMap<String, Any?>) -> Pair<String, T> = {
             pathToName.second to converter(it)
         }
         val rule = KSAXPostProcessRule(pathToName.first, f)
