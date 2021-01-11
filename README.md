@@ -42,7 +42,7 @@ class SampleParser {
 
         @Suppress("UNCHECKED_CAST")
         withResultBuilder { ctx ->
-            SecondaryEgrnExtract(
+            ParsedObjecct(
                 cadastralNumber = ctx[CADASTRAL_NUMBER] as String,
                 address = ctx[ADDRESS] as String,
                 buyers = ctx[BUYERS] as List<Name>)
